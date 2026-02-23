@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carta | Wrapity</title>
+
+  <style>
+    /* ====== TODO TU CSS EXACTAMENTE IGUAL ====== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif
+    }
+
+    body {
+      background: #fafafa
+    }
+
+    .panel {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column
+    }
+
+.panel-header{
+  position:sticky;
+  top:0;
+  z-index:60;
+  background:#111;
+  color:#fff;
+  padding:18px;
+
+  display:flex;
+  flex-direction: column;
+  justify-content:center;
+  align-items:center;
+}
+
+.panel-header h1{
+  font-size:22px;
+  font-weight:600;
+  margin:0;
+  letter-spacing:.5px;
+}
+
+.panel-header .subtitle{
+  font-size:13px;
+  font-weight:400;
+  opacity:.7;
+  margin-top:4px;
+}
+
+    .promos-section {
+      padding: 16px 16px 4px
+    }
+
+    .promos-title {
+      margin-bottom: 12px;
+      font-size: 18px;
+      font-weight: 600
+    }
+
+    .promos-container {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 6px
+    }
+
+    .promos-container::-webkit-scrollbar {
+      display: none
+    }
+
+    .promo-card {
+      min-width: 260px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+      overflow: hidden;
+      flex-shrink: 0
+    }
+
+    .promo-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover
+    }
+
+    .promo-info {
+      padding: 12px
+    }
+
+    .promo-info h4 {
+      font-size: 16px;
+      margin-bottom: 6px
+    }
+
+    .promo-info p {
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px
+    }
+
+    .promo-price {
+      font-weight: 700
+    }
+
+    .categories {
+      position: sticky;
+      top: 62px;
+      z-index: 50;
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      background: #fafafa;
+      overflow-x: auto
+    }
+
+    .categories::-webkit-scrollbar {
+      display: none
+    }
+
+    .cat {
+      padding: 8px 16px;
+      background: #eee;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: .2s
+    }
+
+    .cat.active {
+      background: #111;
+      color: #fff
+    }
+
+    .list {
+      padding: 15px
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+      margin-bottom: 14px;
+      animation: fade .25s ease
+    }
+
+    @keyframes fade {
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      object-fit: cover
+    }
+
+    .card h3 {
+      font-size: 15px;
+      margin-bottom: 4px
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #555
+    }
+
+    .price {
+      margin-top: 6px;
+      font-weight: 700
+    }
+
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: rgba(250, 250, 250, .95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 200
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #ddd;
+      border-top: 3px solid #111;
+      border-radius: 50%;
+      animation: spin 1s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="panel">
+<div class="panel-header">
+  <h1>Wrapity</h1>
+  <span class="subtitle">Wraps Saludables</span>
+</div>
+
+    <section class="promos-section">
+      <div class="promos-title">🔥 Promos destacadas</div>
+      <div class="promos-container" id="promosContainer"></div>
+    </section>
+
+    <div class="categories" id="categories"></div>
+    <div class="list" id="products"></div>
+  </div>
+
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <p>Cargando carta…</p>
+  </div>
+
+  <script>
+    /* ===============================
+       🔥 PRODUCTOS CARGADOS A MANO
+       =============================== */
+
+    const productos = [
+
+      /* ================= CLASICOS ================= */
+      {
+        nombre: "Bondiola a la Cerveza",
+        descripcion: "Bondiola desmenuzada, cerveza negra, cebolla y queso tybo",
+        precio: 9000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Clasicos",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Pollo Cheddar",
+        descripcion: "Pechuga, Cheddar, Cebolla de Verdeo",
+        precio: 8500,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Clasicos",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Especial",
+        descripcion: "Carne Picada, queso tybo, lechuga y tomate",
+        precio: 8500,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Clasicos",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Premium",
+        descripcion: "Queso tybo, Queso Roquefort, Cebolla Caramelizada, Aceitunas Negras",
+        precio: 8000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Clasicos",
+        activo: true,
+        promo: false
+      },
+
+      /* ================= CALIENTES ================= */
+      {
+        nombre: "Simple",
+        descripcion: "Pollo, Morrón y  queso tybo",
+        precio: 7000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Calientes",
+        activo: true,
+        promo: false
+      },
+
+      {
+        nombre: "Pollo Roque",
+        descripcion: "Pollo, Roquefort, Verdeo",
+        precio: 7000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Calientes",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Dechini",
+        descripcion: "Garbanzos, Zuchinini, Queso Tybo",
+        precio: 6500,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Calientes",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Premium",
+        descripcion: "Queso Roquefort, Queso Tybo, Cebolla Caramelizada, Aceitunas Negras ",
+        precio: 7000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Calientes",
+        activo: true,
+        promo: false
+      },
+
+
+      /* ================= CALIENTES / FRIO ================= */
+      {
+        nombre: "Pollo y Re",
+        descripcion: "Pollo, Repollo, Zanahoria, Queso Crema, Queso Tybo.",
+        precio: 7000,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Calientes / Frios",
+        activo: true,
+        promo: false
+      },
+
+      /* ================= FRIO ================= */
+      {
+        nombre: "Rudo",
+        descripcion: "Jamón Crudo, Rúcula, Huevo Revuelto, Queso Tybo, Queso Crema.",
+        precio: 6500,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Frio",
+        activo: true,
+        promo: false
+      },
+      {
+        nombre: "Rudo",
+        descripcion: " Rúcula, Zanahoria,  Huevo Revuelto, Queso Tybo, Queso Crema.",
+        precio: 6500,
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Frio",
+        activo: true,
+        promo: false
+      },
+
+      /* ================= PROMOCIONES ================= */
+      {
+        nombre: "Combo Bondiola",
+        precio: 10500,
+        descripcion: "Combos Gaseosas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Gaseosas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Cheddar",
+        precio: 10000,
+        descripcion: "Combos Gaseosas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Gaseosas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Especial",
+        precio: 10000,
+        descripcion: "Combos Gaseosas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Gaseosas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Premium",
+        precio: 9500,
+        descripcion: "Combos Gaseosas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Gaseosas",
+        activo: true,
+        promo: true
+      },
+      /* ================= COMBOS CERVECEROS ================= */
+      {
+        nombre: "Combo Bondiola",
+        precio: 11000,
+        descripcion: "Combos Cervezas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Cervezas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Cheddar",
+        precio: 10500,
+        descripcion: "Combos Cervezas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Cervezas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Especial",
+        precio: 15000,
+        descripcion: "Combos Cervezas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Cervezas",
+        activo: true,
+        promo: true
+      },
+      {
+        nombre: "Combo Premium",
+        precio: 10000,
+        descripcion: "Combos Cervezas",
+        imgURL: "img/logo_wrapity.png",
+        categoria: "Combos Cervezas",
+        activo: true,
+        promo: true
+      },
+    ];
+
+    /* ================= FUNCIONES ================= */
+
+    const categoriesDiv = document.getElementById("categories");
+    const productsDiv = document.getElementById("products");
+    const promosContainer = document.getElementById("promosContainer");
+    const promosSection = document.querySelector(".promos-section");
+    const loader = document.getElementById("loader");
+
+    let currentCategory = "";
+
+    const normalize = t =>
+      t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+
+    const price = p => "$" + p.toLocaleString("es-AR");
+
+    /* ===== PROMOS ===== */
+    function loadPromos() {
+      const promos = productos.filter(p => p.promo && p.activo);
+
+      if (!promos.length) {
+        promosSection.style.display = "none";
+        return;
+      }
+
+      promos.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "promo-card";
+        card.innerHTML = `
+      <img src="${p.imgURL}">
+      <div class="promo-info">
+        <h4>${p.nombre}</h4>
+        <p>${p.descripcion || ""}</p>
+        <div class="promo-price">${price(p.precio)}</div>
+      </div>`;
+        promosContainer.appendChild(card);
+      });
+    }
+
+    /* ===== CATEGORÍAS ===== */
+    function loadCategories() {
+      const cats = [...new Set(productos.map(p => p.categoria))];
+
+      cats.forEach((cat, i) => {
+        const el = document.createElement("div");
+        el.className = "cat";
+        el.innerText = cat;
+        el.onclick = () => selectCategory(cat, el);
+        categoriesDiv.appendChild(el);
+
+        if (i === 0) {
+          selectCategory(cat, el);
+        }
+      });
+    }
+
+    /* ===== SELECT CATEGORY ===== */
+    function selectCategory(cat, el) {
+      currentCategory = cat;
+      document.querySelectorAll(".cat").forEach(c => c.classList.remove("active"));
+      el.classList.add("active");
+      loadProducts();
+    }
+
+    /* ===== LOAD PRODUCTS ===== */
+    function loadProducts() {
+      productsDiv.innerHTML = "";
+      loader.style.display = "flex";
+
+      const selected = normalize(currentCategory);
+
+      setTimeout(() => {
+        const list = productos.filter(p =>
+          p.activo && normalize(p.categoria) === selected
+        );
+
+        if (!list.length) {
+          productsDiv.innerHTML = "<p style='padding:20px;color:#777'>No hay productos</p>";
+        }
+
+        list.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+        <img src="${p.imgURL}">
+        <div>
+          <h3>${p.nombre}</h3>
+          <p>${p.descripcion || ""}</p>
+          <div class="price">${price(p.precio)}</div>
+        </div>`;
+          productsDiv.appendChild(card);
+        });
+
+        loader.style.display = "none";
+      }, 300);
+    }
+
+    /* ===== INIT ===== */
+    loadPromos();
+    loadCategories();
+
+  </script>
+
+</body>
+
+</html>
